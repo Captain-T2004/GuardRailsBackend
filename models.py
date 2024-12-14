@@ -1,5 +1,8 @@
 from pydantic import BaseModel
-from typing import List, Optional
 
 class ValidationRequest(BaseModel):
     text: str
+
+class RegistrationRequest(BaseModel):
+    input_validators: list[str]
+    output_validators: list[str]
