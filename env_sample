@@ -1,0 +1,10 @@
+# App Settings
+APP_HOST=0.0.0.0
+APP_PORT=44444
+
+# Database Config
+DATABASE_USER=postgres
+DATABASE_PASSWORD=#########
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_NAME=grailsdb
