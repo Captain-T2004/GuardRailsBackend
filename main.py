@@ -21,24 +21,18 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],  # Allows all methods
-    allow_headers=["*"],  # Allows all headers
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 @app.on_event("startup")
 async def startup_event():
-    """
-    Initialize FastAPILimiter during the FastAPI app's startup event.
-    """
     redis_con = redis.from_url("redis://localhost", encoding="utf-8", decode_responses=True)
     await FastAPILimiter.init(redis_con)
 
 @app.post("/register")
 async def register_user(data: RegistrationRequest, db: Session = Depends(get_db)):
-    # Generate a unique API key
     api_key = secrets.token_hex(16)
-
-    # Save user data to the database
     user = User(
         api_key=api_key,
         input_validators=",".join(data.input_validators),
