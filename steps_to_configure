@@ -1,3 +1,5 @@
+# need to have redis installed and running locally for fastapi rate limiting
+
 python -m venv env
 
 pip install -r requirements.txt
@@ -9,3 +11,31 @@ chmod +x commands.sh
 ./commands.sh
 
 uvicorn main:app --host 0.0.0.0 --port 44444 --reload
+
+
+## API endpoints
+
+# generate API key:
+
+path: http://localhost:44444/register - POST 
+sample request:
+{
+  "input_validators": ["regex_match", "valid_length", "detect_pii"],
+  "output_validators": ["financial_tone", "guardrails_pii", "has_url"]
+}
+
+# validate input:
+path: http://localhost:44444/validate_input - POST
+Auth: "X-API-Key" : $API_KEY_GENERATED_EARLIER
+sample request:
+{
+	"text": "Sample text input"
+}
+
+# validate output:
+path: http://localhost:44444/validate_output - POST
+Auth: "X-API-Key" : $API_KEY_GENERATED_EARLIER
+sample request:
+{
+	"text": "Sample text output"
+}
