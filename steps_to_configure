@@ -1,4 +1,5 @@
 # need to have redis installed and running locally for fastapi rate limiting
+# and make .env file just like env_sample and add all db info
 
 python -m venv env
 
