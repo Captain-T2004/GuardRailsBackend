@@ -1,0 +1,11 @@
+python -m venv env
+
+pip install -r requirements.txt
+
+guardrails configure( need guardrails api key )
+
+chmod +x commands.sh
+
+./commands.sh
+
+uvicorn main:app --host 0.0.0.0 --port 44444 --reload
