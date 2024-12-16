@@ -17,3 +17,13 @@ async def get_validators(api_key: str = Depends(API_KEY_HEADER), db: Session = D
         "input_validators": user.input_validators.split(","),
         "output_validators": user.output_validators.split(","),
     }
+
+async def verify_key(api_key: str = Depends(API_KEY_HEADER), db: Session = Depends(get_db)):
+    if not api_key:
+        return None
+
+    user = db.query(User).filter(User.api_key == api_key).first()
+    if not user:
+        return None
+
+    return api_key
