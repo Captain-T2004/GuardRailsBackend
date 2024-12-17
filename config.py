@@ -1,23 +1,8 @@
 from guardrails import Guard
 from guardrails.hub import (
-    RegexMatch,
-    ValidLength,
-    EndsWith,
-    ContainsString,
-    CompetitorCheck,
-    DetectPII,
-    GibberishText,
-    NSFWText,
-    SecretsPresent,
-    ToxicLanguage,
-    FinancialTone,
-    GuardrailsPII,
-    HasUrl,
-    LowerCase,
-    MentionsDrugs,
-    OneLine,
-    RedundantSentences,
-    ValidPython,
+    DetectPII, GibberishText, NSFWText, SecretsPresent,
+    ToxicLanguage, FinancialTone, GuardrailsPII, HasUrl,
+    MentionsDrugs, RedundantSentences, ValidPython
 )
 
 input_validators = {
@@ -47,7 +32,6 @@ def create_guard(validator_type="input", selected_validators=None):
         if validator_type == "input": validators_set = input_validators.values()
         elif validator_type == "output": validators_set = output_validators.values()
         else: raise ValueError("Invalid validator_type. Must be 'input' or 'output'.")
-    print(validators_set)
     return Guard(name=f"{validator_type}-dynamic-validator").use_many(*validators_set)
 
 def parse_validation_output(validation_outcome):

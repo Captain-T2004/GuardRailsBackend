@@ -7,4 +7,11 @@ DATABASE_USER=postgres
 DATABASE_PASSWORD=#########
 DATABASE_HOST=localhost
 DATABASE_PORT=5432
-DATABASE_NAME=grailsdb
+DATABASE_NAME=#################
+
+#AUTH0
+AUTH0_DOMAIN=########################
+AUTH0_AUDI=##########################
+
+# System Config
+UPLOAD_FILE_PATH=#################################
