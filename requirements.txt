@@ -21,5 +21,3 @@ pyright
 ruff
 codespell
 httpx
-python-jose
-auth0-python
