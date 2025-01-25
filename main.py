@@ -22,6 +22,8 @@ from config import create_guard, parse_validation_output
 from models import ValidationRequest, RegistrationRequest, KeyDeletionRequest
 from database import Api, Event as UserSession, get_db
 from auth import get_validators, verify_key, verify_session
+from pyngrok import ngrok
+import uvicorn
 
 load_dotenv()
 app = FastAPI()
@@ -30,16 +32,6 @@ ALGORITHMS = ["RS256"]
 AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN')
 UPLOAD_FILE_PATH = os.getenv('UPLOAD_FILE_PATH')
 API_KEY_HEADER = APIKeyHeader(name="X-API-Key", auto_error=False)
-
-origins = ["*"]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(bearer_scheme)):
     try:
@@ -254,3 +246,15 @@ async def validation_endpoint(
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
+
+ngrok.set_auth_token(os.getenv('NGROK_API_TOKEN'))
+public_url = str(ngrok.connect(8000))
+print(f"Public URL: {public_url}")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)

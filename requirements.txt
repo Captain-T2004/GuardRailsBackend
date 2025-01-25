@@ -26,3 +26,7 @@ auth0-python
 litellm
 bleach
 sqlvalidator
+sqlalchemy_utils
+pyngrok
+fastapi_limiter
+redis

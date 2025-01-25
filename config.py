@@ -2,7 +2,7 @@ from guardrails import Guard
 from guardrails.hub import (
     DetectPII, GibberishText, NSFWText,
     ProfanityFree, SecretsPresent, ToxicLanguage,
-    DetectJailbreak, FinancialTone, GuardrailsPII, HasUrl,
+    DetectJailbreak, FinancialTone, HasUrl,
     MentionsDrugs, RedundantSentences, ValidJson,
     ValidPython, ValidURL, ValidSQL, ValidOpenApiSpec, WebSanitization
 )
