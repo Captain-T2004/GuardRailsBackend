@@ -23,3 +23,6 @@ codespell
 httpx
 python-jose
 auth0-python
+litellm
+bleach
+sqlvalidator

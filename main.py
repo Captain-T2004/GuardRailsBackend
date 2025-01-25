@@ -23,17 +23,15 @@ from models import ValidationRequest, RegistrationRequest, KeyDeletionRequest
 from database import Api, Event as UserSession, get_db
 from auth import get_validators, verify_key, verify_session
 
+load_dotenv()
 app = FastAPI()
 bearer_scheme = HTTPBearer()
 ALGORITHMS = ["RS256"]
 AUTH0_DOMAIN = os.getenv('AUTH0_DOMAIN')
 UPLOAD_FILE_PATH = os.getenv('UPLOAD_FILE_PATH')
 API_KEY_HEADER = APIKeyHeader(name="X-API-Key", auto_error=False)
-load_dotenv()
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-]
+
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
@@ -120,18 +118,6 @@ async def register_user(data: RegistrationRequest, db: SQLASession = Depends(get
     db.commit()
     return {"api_key": api_key}
 
-@app.post("/start_event")
-async def start_event(api_key = Depends(verify_key), db: SQLASession = Depends(get_db)):
-    api_user = db.query(Api).filter(Api.api_key == api_key).first()
-    if not api_user:
-        raise HTTPException(status_code=401, detail="Invalid API key")
-
-    event_id = str(uuid.uuid4())
-    new_session = UserSession(event_id=event_id, api_id=api_user.id)
-    db.add(new_session)
-    db.commit()
-    return {"event_id": event_id}
-
 @app.get("/prev_keys", dependencies=[Depends(RateLimiter(times=1000, seconds=60))])
 async def get_prev_apis(db: SQLASession = Depends(get_db), user=Depends(get_current_user)):
     existing_keys = db.query(Api).filter(Api.sub == user["sub"]).all()
@@ -150,6 +136,14 @@ async def get_prev_apis(db: SQLASession = Depends(get_db), user=Depends(get_curr
         for key in existing_keys
     ]
     return {"api_keys": api_keys_data}
+
+@app.get("/validators", dependencies=[Depends(RateLimiter(times=1000, seconds=60))])
+async def get_all_validators(validators=Depends(get_validators),):
+
+    return {
+        "input_validators": validators["input_validators"],
+        "output_validators": validators["output_validators"]
+    }
 
 @app.post("/delete_keys", dependencies=[Depends(RateLimiter(times=1000, seconds=60))])
 async def delete_prev_key(data: KeyDeletionRequest, db: SQLASession = Depends(get_db), user=Depends(get_current_user)):
@@ -170,6 +164,7 @@ async def delete_prev_key(data: KeyDeletionRequest, db: SQLASession = Depends(ge
         }
 
     except Exception as e:
+        print(e)
         db.rollback()
         
         raise HTTPException(
@@ -177,7 +172,20 @@ async def delete_prev_key(data: KeyDeletionRequest, db: SQLASession = Depends(ge
             detail="An error occurred while deleting the API key"
         )
 
-@app.post("/validate", dependencies=[Depends(RateLimiter(times=100, seconds=86400))])
+@app.post("/start_event")
+async def start_event(api_key = Depends(verify_key), db: SQLASession = Depends(get_db)):
+    api_user = db.query(Api).filter(Api.api_key == api_key).first()
+    if not api_user:
+        raise HTTPException(status_code=401, detail="Invalid API key")
+
+    event_id = str(uuid.uuid4())
+    new_session = UserSession(event_id=event_id, api_id=api_user.id)
+    db.add(new_session)
+    db.commit()
+    return {"event_id": event_id}
+
+
+@app.post("/validate", dependencies=[Depends(RateLimiter(times=1000000000, seconds=86400))])
 async def validation_endpoint(
     type: str = Form(...),
     userprompt: str = Form(...),
@@ -214,7 +222,6 @@ async def validation_endpoint(
         )
         db.add(event)
         db.commit()
-
         attachment_file_path = None
         if request.attachments:
             filename = str(uuid.uuid4())+request.attachments.filename
@@ -224,13 +231,11 @@ async def validation_endpoint(
             with open(attachment_file_path, "wb") as f:
                 content = await request.attachments.read()
                 f.write(content)
-
         if(request.type == "input"): guard = create_guard(selected_validators=validators["input_validators"], validator_type="input")
         else: guard = create_guard(selected_validators=validators["output_validators"], validator_type="output")
         validation_outcome = parse_validation_output(
-            guard.parse(f"{request.userprompt}\n{request.systemprompt}")
+            guard.parse(f"{request.userprompt}\n{request.systemprompt}"),
         )
-
         results = event.results or []
         results.append({
             "type": request.type,
@@ -241,7 +246,6 @@ async def validation_endpoint(
             "attachment_file_type": request.attachment_file_type,
         })
         event.results = results
-
         db.commit()
 
         return {"validation_outcome": validation_outcome}

@@ -1,95 +1,73 @@
 from guardrails import Guard
 from guardrails.hub import (
-    DetectPII, GibberishText, NSFWText, SecretsPresent,
-    ToxicLanguage, FinancialTone, GuardrailsPII, HasUrl,
-    MentionsDrugs, RedundantSentences, ValidPython
+    DetectPII, GibberishText, NSFWText,
+    ProfanityFree, SecretsPresent, ToxicLanguage,
+    DetectJailbreak, FinancialTone, GuardrailsPII, HasUrl,
+    MentionsDrugs, RedundantSentences, ValidJson,
+    ValidPython, ValidURL, ValidSQL, ValidOpenApiSpec, WebSanitization
 )
 
 input_validators = {
-    "detect_pii": DetectPII(on_fail="noop"),
-    "gibberish_text": GibberishText(on_fail="noop"),
-    "nsfw_text": NSFWText(on_fail="noop"),
-    "secrets_present": SecretsPresent(on_fail="noop"),
-    "toxic_language": ToxicLanguage(on_fail="noop"),
+    "DetectPII": DetectPII(on_fail="noop"),
+    "SecretsPresent": SecretsPresent(on_fail="noop"),
+    "DetectJailbreak": DetectJailbreak(on_fail="noop"),
+    "MentionsDrugs": MentionsDrugs(on_fail="noop"),
 }
 
 output_validators = {
-    "financial_tone": FinancialTone(on_fail="noop"),
-    "guardrails_pii": GuardrailsPII(entities=["CREDIT_CARD", "CRYPTO", "PHONE_NUMBER"], on_fail="fix"),
-    "has_url": HasUrl(on_fail="noop"),
-    "mentions_drugs": MentionsDrugs(on_fail="noop"),
-    "redundant_sentences": RedundantSentences(on_fail="noop"),
-    "valid_python": ValidPython(on_fail="noop"),
-    "detect_pii": DetectPII(on_fail="noop"),
+    "DetectPII": DetectPII(on_fail="noop"),
+    "ProfanityFree":ProfanityFree(on_fail="noop"),
+    "WebSanitization": WebSanitization(on_fail="noop"),
+    "GibberishText": GibberishText(on_fail="noop"),
+    "NSFWText": NSFWText(on_fail="noop"),
+    "FinancialTone": FinancialTone(on_fail="noop"),
+    "SecretsPresent": SecretsPresent(on_fail="noop"),
+    "MentionsDrugs": MentionsDrugs(on_fail="noop"),
+    "RedundantSentences": RedundantSentences(on_fail="noop"),
+    "ToxicLanguage": ToxicLanguage(on_fail="noop"),
+    "ValidPython": ValidPython(on_fail="noop"),
+    "DetectJailbreak": DetectJailbreak(on_fail="noop"),
+    "ValidOpenApiSpec": ValidOpenApiSpec(on_fail="noop"),
+    "ValidJson": ValidJson(on_fail="noop"),
+    "ValidSQL": ValidSQL(on_fail="noop"),
+    "ValidURL": ValidURL(on_fail="noop"),
+    "HasUrl": HasUrl(on_fail="noop"),
 }
 
 def create_guard(validator_type="input", selected_validators=None):
-    if(selected_validators):
-        if validator_type == "input": validators_set = [input_validators[validator] for validator in selected_validators]
-        elif validator_type == "output": validators_set = [output_validators[validator] for validator in selected_validators]
-        else: raise ValueError("Invalid validator_type. Must be 'input' or 'output'.")
-    else:
-        if validator_type == "input": validators_set = input_validators.values()
-        elif validator_type == "output": validators_set = output_validators.values()
-        else: raise ValueError("Invalid validator_type. Must be 'input' or 'output'.")
+    if validator_type == "input": validators_set = [input_validators[validator] for validator in selected_validators]
+    elif validator_type == "output": validators_set = [output_validators[validator] for validator in selected_validators]
+    else: raise ValueError("Invalid validator_type. Must be 'input' or 'output'.")
     return Guard(name=f"{validator_type}-dynamic-validator").use_many(*validators_set)
 
 def parse_validation_output(validation_outcome):
-    if( not validation_outcome): return []
+    if not validation_outcome:
+        return []
+
     parsed_outcome = {
-        "validation_passed": validation_outcome.validation_passed,
-        "error": validation_outcome.error,
+        "validation_passed": getattr(validation_outcome, "validation_passed", False),
+        "error": getattr(validation_outcome, "error", None),
         "validation_summaries": [],
-        "raw_llm_output": validation_outcome.raw_llm_output,
+        "raw_llm_output": getattr(validation_outcome, "validated_output", None),
     }
-    parsed_outcome["validation_summaries"] = [
-        {
-            "validator_name": i.validator_name,
-            "validator_status": i.validator_status,
-            "failure_reason": i.failure_reason,
-            "error_spans": [[j.start, j.end, j.reason] for j in i.error_spans],
-        } for i in validation_outcome.validation_summaries ]
+
+    validation_summaries = getattr(validation_outcome, "validation_summaries", [])
+    for summary in validation_summaries:
+        validator_name = getattr(summary, "validator_name", "Unknown")
+        validator_status = getattr(summary, "validator_status", "Unknown")
+        failure_reason = getattr(summary, "failure_reason", "No reason provided")
+        
+        error_spans = []
+        if getattr(summary, "error_spans", None):
+            error_spans = [
+                [getattr(span, "start", 0), getattr(span, "end", 0), getattr(span, "reason", "Unknown")]
+                for span in summary.error_spans
+            ]
+
+        parsed_outcome["validation_summaries"].append({
+            "validator_name": validator_name,
+            "validator_status": validator_status,
+            "failure_reason": failure_reason,
+            "error_spans": error_spans,
+        })
     return parsed_outcome
-
-
-"""
-# Guardrails PII supported validations:
-    "CREDIT_CARD",
-    "CRYPTO",
-    "DATE_TIME",
-    "EMAIL_ADDRESS",
-    "IBAN_CODE",
-    "IP_ADDRESS",
-    "NRP",
-    "LOCATION",
-    "PERSON",
-    "PHONE_NUMBER",
-    "MEDICAL_LICENSE",
-    "URL",
-    "US_BANK_NUMBER",
-    "US_DRIVER_LICENSE",
-    "US_ITIN",
-    "US_PASSPORT",
-    "US_SSN",
-    "UK_NHS",
-    "ES_NIF",
-    "ES_NIE",
-    "IT_FISCAL_CODE",
-    "IT_DRIVER_LICENSE",
-    "IT_VAT_CODE",
-    "IT_PASSPORT",
-    "IT_IDENTITY_CARD",
-    "PL_PESEL",
-    "SG_NRIC_FIN",
-    "SG_UEN",
-    "AU_ABN",
-    "AU_ACN",
-    "AU_TFN",
-    "AU_MEDICARE",
-    "IN_PAN",
-    "IN_AADHAAR",
-    "IN_VEHICLE_REGISTRATION",
-    "IN_VOTER",
-    "IN_PASSPORT",
-    "FI_PERSONAL_IDENTITY_CODE"
-"""

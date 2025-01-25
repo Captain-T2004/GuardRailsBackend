@@ -12,7 +12,7 @@ from sqlalchemy_utils import database_exists, create_database
 
 load_dotenv()
 
-SQLALCHEMY_DATABASE_URL = f"postgresql://{os.getenv('DATABASE_USER')}:{os.getenv('DATABASE_PASSWORD')}@{os.getenv('DATABASE_HOST')}:{os.getenv('DATABASE_PORT')}/{os.getenv('DATABASE_NAME')}"
+SQLALCHEMY_DATABASE_URL = f"postgresql://{os.getenv('DATABASE_USER')}:{os.getenv('DATABASE_PASSWORD')}@{os.getenv('DATABASE_HOST')}:{os.getenv('DATABASE_PORT')}/{os.getenv('DATABASE_NAME')}?sslmode=require"
 
 Base = declarative_base()
 engine = create_engine(SQLALCHEMY_DATABASE_URL)
@@ -41,7 +41,7 @@ class Event(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     event_id = Column(String, nullable=False)
-    api_id = Column(Integer, ForeignKey("apis.id"), nullable=False)
+    api_id = Column(Integer, nullable=False)
     time_stamp = Column(DateTime(timezone=True), server_default=func.now())
     results = Column(JSON, default=[])
 
