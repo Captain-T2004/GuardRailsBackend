@@ -247,9 +247,9 @@ async def validation_endpoint(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
 
-ngrok.set_auth_token(os.getenv('NGROK_API_TOKEN'))
-public_url = str(ngrok.connect(8000, domain=os.getenv('NGROK_STATIC_DOMAIN')))
-print(f"Public URL: {public_url}")
+# ngrok.set_auth_token(os.getenv('NGROK_API_TOKEN'))
+# public_url = str(ngrok.connect(8000, domain=os.getenv('NGROK_STATIC_DOMAIN')))
+# print(f"Public URL: {public_url}")
 
 app.add_middleware(
     CORSMiddleware,
