@@ -248,13 +248,13 @@ async def validation_endpoint(
         raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
 
 ngrok.set_auth_token(os.getenv('NGROK_API_TOKEN'))
-public_url = str(ngrok.connect(8000))
+public_url = str(ngrok.connect(8000, domain=os.getenv('NGROK_STATIC_DOMAIN')))
 print(f"Public URL: {public_url}")
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
