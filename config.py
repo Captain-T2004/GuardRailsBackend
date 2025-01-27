@@ -8,30 +8,30 @@ from guardrails.hub import (
 )
 
 input_validators = {
-    "DetectPII": DetectPII(on_fail="noop"),
-    "SecretsPresent": SecretsPresent(on_fail="noop"),
-    "DetectJailbreak": DetectJailbreak(on_fail="noop"),
-    "MentionsDrugs": MentionsDrugs(on_fail="noop"),
+    "DetectPII": DetectPII(on_fail="noop", use_local = True),
+    "SecretsPresent": SecretsPresent(on_fail="noop", use_local = True),
+    "DetectJailbreak": DetectJailbreak(on_fail="noop", use_local = True),
+    "MentionsDrugs": MentionsDrugs(on_fail="noop", use_local = True),
 }
 
 output_validators = {
-    "DetectPII": DetectPII(on_fail="noop"),
-    "ProfanityFree":ProfanityFree(on_fail="noop"),
+    "DetectPII": DetectPII(on_fail="noop", use_local = True),
+    "ProfanityFree":ProfanityFree(on_fail="noop", use_local = True),
     "WebSanitization": WebSanitization(on_fail="noop"),
-    "GibberishText": GibberishText(on_fail="noop"),
-    "NSFWText": NSFWText(on_fail="noop"),
-    "FinancialTone": FinancialTone(on_fail="noop"),
-    "SecretsPresent": SecretsPresent(on_fail="noop"),
-    "MentionsDrugs": MentionsDrugs(on_fail="noop"),
-    "RedundantSentences": RedundantSentences(on_fail="noop"),
-    "ToxicLanguage": ToxicLanguage(on_fail="noop"),
-    "ValidPython": ValidPython(on_fail="noop"),
-    "DetectJailbreak": DetectJailbreak(on_fail="noop"),
+    "GibberishText": GibberishText(on_fail="noop", use_local = True),
+    "NSFWText": NSFWText(on_fail="noop", use_local = True),
+    "FinancialTone": FinancialTone(on_fail="noop", use_local = True),
+    "SecretsPresent": SecretsPresent(on_fail="noop", use_local = True),
+    "MentionsDrugs": MentionsDrugs(on_fail="noop", use_local = True),
+    "RedundantSentences": RedundantSentences(on_fail="noop", use_local = True),
+    "ToxicLanguage": ToxicLanguage(on_fail="noop", use_local = True),
+    "ValidPython": ValidPython(on_fail="noop", use_local = True),
+    "DetectJailbreak": DetectJailbreak(on_fail="noop", use_local = True),
     "ValidOpenApiSpec": ValidOpenApiSpec(on_fail="noop"),
-    "ValidJson": ValidJson(on_fail="noop"),
+    "ValidJson": ValidJson(on_fail="noop", use_local = True),
     "ValidSQL": ValidSQL(on_fail="noop"),
-    "ValidURL": ValidURL(on_fail="noop"),
-    "HasUrl": HasUrl(on_fail="noop"),
+    "ValidURL": ValidURL(on_fail="noop", use_local = True),
+    "HasUrl": HasUrl(on_fail="noop", use_local = True),
 }
 
 def create_guard(validator_type="input", selected_validators=None):

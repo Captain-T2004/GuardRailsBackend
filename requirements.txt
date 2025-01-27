@@ -30,3 +30,4 @@ sqlalchemy_utils
 pyngrok
 fastapi_limiter
 redis
+unsloth
